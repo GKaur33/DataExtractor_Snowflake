@@ -6,7 +6,7 @@ import base64
 import pandas as pd
 import os
 from datetime import datetime
-from azure.storage.blob import BlobServiceClient
+from azure.storage.blob import BlobServiceClient, BlobClient, ContainerClient
 
 # Set environment variable for SSL certificates
 os.environ['REQUESTS_CA_BUNDLE'] = "c:\\temp\\tmobilesnowflakepub.pem"
