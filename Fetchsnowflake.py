@@ -17,7 +17,7 @@ logging.basicConfig(level=logging.INFO)
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 # Path to the certificate in the Function App environment
-cert_path = "/home/site/wwwroot/certs/tmobilesnowflakepub.cer"
+cert_path = "/home/site/wwwroot/certs/tmobilesnowflakepub.pem"
 
 # Log the certificate path for debugging
 logging.info(f"Using certificate at path: {cert_path}")
