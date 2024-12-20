@@ -7,11 +7,15 @@ import pandas as pd
 import os
 from datetime import datetime
 from azure.storage.blob import BlobServiceClient, BlobClient
+from requests.packages.urllib3.exceptions import InsecureRequestWarning
+
+# Suppress SSL certificate verification warnings
+requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
 # Path to the certificate in the Function App environment
 cert_path = "/home/site/wwwroot/certs/tmobilesnowflakepub.cer"
 
-# Set environment variable for SSL certificates
+# Set environment variable for SSL certificates (if you have a custom CA, otherwise bypass)
 os.environ['REQUESTS_CA_BUNDLE'] = cert_path
 
 # Snowflake OAuth credentials
@@ -45,11 +49,12 @@ def fetch_and_upload_snowflake_data(req):
         })
         data = data.encode('ascii')
 
-        # Get the access token from Snowflake
+        # Get the access token from Snowflake (bypassing SSL cert verification)
         r = requests.post(
             token_endpoint,
             headers=hdrs,
-            data=data
+            data=data,
+            verify=False  # Bypass SSL verification
         )
 
         access_token = r.json()['access_token']
