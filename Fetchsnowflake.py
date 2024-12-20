@@ -1,3 +1,4 @@
+import logging
 import snowflake.connector
 import requests
 import json
@@ -9,11 +10,17 @@ from datetime import datetime
 from azure.storage.blob import BlobServiceClient, BlobClient
 import urllib3
 
+# Set up logging
+logging.basicConfig(level=logging.INFO)
+
 # Suppress SSL certificate verification warnings
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 # Path to the certificate in the Function App environment
 cert_path = "/home/site/wwwroot/certs/tmobilesnowflakepub.cer"
+
+# Log the certificate path for debugging
+logging.info(f"Using certificate at path: {cert_path}")
 
 # Set environment variable for SSL certificates (if you have a custom CA, otherwise bypass)
 os.environ['REQUESTS_CA_BUNDLE'] = cert_path
@@ -54,8 +61,12 @@ def fetch_and_upload_snowflake_data(req):
             token_endpoint,
             headers=hdrs,
             data=data,
-            verify=False  # Bypass SSL verification
+            verify=False  # Bypass SSL verification (ensure it's used only for testing)
         )
+
+        # Ensure that the token response is successful
+        if r.status_code != 200:
+            raise Exception(f"Failed to get access token. Response: {r.text}")
 
         access_token = r.json()['access_token']
 
@@ -94,12 +105,19 @@ def fetch_and_upload_snowflake_data(req):
         return "Data fetched and uploaded successfully."
 
     except Exception as e:
+        logging.error(f"An error occurred: {str(e)}")
         return f"An error occurred: {str(e)}"
 
 # Helper function to upload to Azure Blob Storage
 def upload_to_blob(file_path, blob_name):
-    blob_service_client = BlobServiceClient.from_connection_string(azure_blob_connection_string)
-    blob_client = blob_service_client.get_blob_client(container=container_name, blob=blob_name)
-    
-    with open(file_path, "rb") as data:
-        blob_client.upload_blob(data, overwrite=True)
+    try:
+        blob_service_client = BlobServiceClient.from_connection_string(azure_blob_connection_string)
+        blob_client = blob_service_client.get_blob_client(container=container_name, blob=blob_name)
+
+        # Upload the file in chunks to avoid memory issues for large files
+        with open(file_path, "rb") as data:
+            blob_client.upload_blob(data, overwrite=True)
+        
+        logging.info(f"Successfully uploaded {file_path} to {blob_name}")
+    except Exception as e:
+        logging.error(f"Error uploading file to blob: {str(e)}")
