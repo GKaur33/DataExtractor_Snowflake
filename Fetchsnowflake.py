@@ -6,10 +6,13 @@ import base64
 import pandas as pd
 import os
 from datetime import datetime
-from azure.storage.blob import BlobServiceClient, BlobClient, ContainerClient
+from azure.storage.blob import BlobServiceClient, BlobClient
+
+# Path to the certificate in the Function App environment
+cert_path = "/home/site/wwwroot/certs/tmobilesnowflakepub.cer"
 
 # Set environment variable for SSL certificates
-os.environ['REQUESTS_CA_BUNDLE'] = "c:\\temp\\tmobilesnowflakepub.pem"
+os.environ['REQUESTS_CA_BUNDLE'] = cert_path
 
 # Snowflake OAuth credentials
 client_id = 'OqucQN2z+R814wveF/Tc7UB2X7o='
