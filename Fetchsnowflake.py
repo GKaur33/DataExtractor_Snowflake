@@ -7,10 +7,10 @@ import pandas as pd
 import os
 from datetime import datetime
 from azure.storage.blob import BlobServiceClient, BlobClient
-from requests.packages.urllib3.exceptions import InsecureRequestWarning
+import urllib3
 
 # Suppress SSL certificate verification warnings
-requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 # Path to the certificate in the Function App environment
 cert_path = "/home/site/wwwroot/certs/tmobilesnowflakepub.cer"
